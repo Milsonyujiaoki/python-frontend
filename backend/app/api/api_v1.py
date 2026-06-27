@@ -3,9 +3,9 @@ API v1 router configuration.
 """
 from fastapi import APIRouter
 
-from .customers import router as customers_router
-from .barbers import router as barbers_router
-from .services import router as services_router
+from .v1.customers import router as customers_router
+from .v1.barbers import router as barbers_router
+from .v1.services import router as services_router
 
 api_router = APIRouter()
 

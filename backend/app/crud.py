@@ -3,7 +3,7 @@ CRUD operations for Customer, Barber, and Service.
 """
 from sqlalchemy.orm import Session
 from typing import Optional
-from .. import models, schemas
+from app import models, schemas
 
 
 def get_customer(db: Session, customer_id: int):
@@ -17,10 +17,10 @@ def get_customer_by_email(db: Session, email: str):
 
 
 def get_customers(
-    db: Session, 
-    skip: int = 0, 
-    limit: int = 100, 
-    search: Optional[str] = None, 
+    db: Session,
+    skip: int = 0,
+    limit: int = 100,
+    search: Optional[str] = None,
     is_active: Optional[bool] = None
 ):
     """Get multiple customers with optional search and filtering."""
@@ -39,14 +39,7 @@ def get_customers(
 
 def create_customer(db: Session, customer: schemas.CustomerCreate):
     """Create a new customer."""
-    db_customer = models.Customer(
-        first_name=customer.first_name,
-        last_name=customer.last_name,
-        email=customer.email,
-        phone=customer.phone,
-        date_of_birth=customer.date_of_birth,
-        notes=customer.notes
-    )
+    db_customer = models.Customer(**customer.model_dump())
     db.add(db_customer)
     db.commit()
     db.refresh(db_customer)
@@ -54,12 +47,12 @@ def create_customer(db: Session, customer: schemas.CustomerCreate):
 
 
 def update_customer(db: Session, customer_id: int, customer: schemas.CustomerUpdate):
-    """Update an existing customer."""
-    db_customer = db.query(models.Customer).filter(models.Customer.id == customer_id).first()
+    """Update a customer."""
+    db_customer = get_customer(db, customer_id)
     if db_customer:
-        update_data = customer.dict(exclude_unset=True)
-        for key, value in update_data.items():
-            setattr(db_customer, key, value)
+        update_data = customer.model_dump(exclude_unset=True)
+        for field, value in update_data.items():
+            setattr(db_customer, field, value)
         db.commit()
         db.refresh(db_customer)
     return db_customer
@@ -67,13 +60,14 @@ def update_customer(db: Session, customer_id: int, customer: schemas.CustomerUpd
 
 def delete_customer(db: Session, customer_id: int):
     """Delete a customer."""
-    db_customer = db.query(models.Customer).filter(models.Customer.id == customer_id).first()
+    db_customer = get_customer(db, customer_id)
     if db_customer:
         db.delete(db_customer)
         db.commit()
     return db_customer
 
 
+# Barber CRUD
 def get_barber(db: Session, barber_id: int):
     """Get a barber by ID."""
     return db.query(models.Barber).filter(models.Barber.id == barber_id).first()
@@ -85,10 +79,10 @@ def get_barber_by_email(db: Session, email: str):
 
 
 def get_barbers(
-    db: Session, 
-    skip: int = 0, 
-    limit: int = 100, 
-    search: Optional[str] = None, 
+    db: Session,
+    skip: int = 0,
+    limit: int = 100,
+    search: Optional[str] = None,
     is_active: Optional[bool] = None
 ):
     """Get multiple barbers with optional search and filtering."""
@@ -107,14 +101,7 @@ def get_barbers(
 
 def create_barber(db: Session, barber: schemas.BarberCreate):
     """Create a new barber."""
-    db_barber = models.Barber(
-        first_name=barber.first_name,
-        last_name=barber.last_name,
-        email=barber.email,
-        phone=barber.phone,
-        specialty=barber.specialty,
-        bio=barber.bio
-    )
+    db_barber = models.Barber(**barber.model_dump())
     db.add(db_barber)
     db.commit()
     db.refresh(db_barber)
@@ -122,12 +109,12 @@ def create_barber(db: Session, barber: schemas.BarberCreate):
 
 
 def update_barber(db: Session, barber_id: int, barber: schemas.BarberUpdate):
-    """Update an existing barber."""
-    db_barber = db.query(models.Barber).filter(models.Barber.id == barber_id).first()
+    """Update a barber."""
+    db_barber = get_barber(db, barber_id)
     if db_barber:
-        update_data = barber.dict(exclude_unset=True)
-        for key, value in update_data.items():
-            setattr(db_barber, key, value)
+        update_data = barber.model_dump(exclude_unset=True)
+        for field, value in update_data.items():
+            setattr(db_barber, field, value)
         db.commit()
         db.refresh(db_barber)
     return db_barber
@@ -135,13 +122,14 @@ def update_barber(db: Session, barber_id: int, barber: schemas.BarberUpdate):
 
 def delete_barber(db: Session, barber_id: int):
     """Delete a barber."""
-    db_barber = db.query(models.Barber).filter(models.Barber.id == barber_id).first()
+    db_barber = get_barber(db, barber_id)
     if db_barber:
         db.delete(db_barber)
         db.commit()
     return db_barber
 
 
+# Service CRUD
 def get_service(db: Session, service_id: int):
     """Get a service by ID."""
     return db.query(models.Service).filter(models.Service.id == service_id).first()
@@ -153,10 +141,10 @@ def get_service_by_name(db: Session, name: str):
 
 
 def get_services(
-    db: Session, 
-    skip: int = 0, 
-    limit: int = 100, 
-    search: Optional[str] = None, 
+    db: Session,
+    skip: int = 0,
+    limit: int = 100,
+    search: Optional[str] = None,
     is_active: Optional[bool] = None
 ):
     """Get multiple services with optional search and filtering."""
@@ -174,13 +162,7 @@ def get_services(
 
 def create_service(db: Session, service: schemas.ServiceCreate):
     """Create a new service."""
-    db_service = models.Service(
-        name=service.name,
-        description=service.description,
-        price=service.price,
-        duration_minutes=service.duration_minutes,
-        is_active=service.is_active
-    )
+    db_service = models.Service(**service.model_dump())
     db.add(db_service)
     db.commit()
     db.refresh(db_service)
@@ -188,12 +170,12 @@ def create_service(db: Session, service: schemas.ServiceCreate):
 
 
 def update_service(db: Session, service_id: int, service: schemas.ServiceUpdate):
-    """Update an existing service."""
-    db_service = db.query(models.Service).filter(models.Service.id == service_id).first()
+    """Update a service."""
+    db_service = get_service(db, service_id)
     if db_service:
-        update_data = service.dict(exclude_unset=True)
-        for key, value in update_data.items():
-            setattr(db_service, key, value)
+        update_data = service.model_dump(exclude_unset=True)
+        for field, value in update_data.items():
+            setattr(db_service, field, value)
         db.commit()
         db.refresh(db_service)
     return db_service
@@ -201,7 +183,7 @@ def update_service(db: Session, service_id: int, service: schemas.ServiceUpdate)
 
 def delete_service(db: Session, service_id: int):
     """Delete a service."""
-    db_service = db.query(models.Service).filter(models.Service.id == service_id).first()
+    db_service = get_service(db, service_id)
     if db_service:
         db.delete(db_service)
         db.commit()

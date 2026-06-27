@@ -2,7 +2,7 @@
 
 import solara
 from .components.customer_table import CustomerTable
-from .state import add_customer, update_customer, get_customer_by_id
+from .customer_state import add_customer, update_customer, get_customer_by_id
 from .components.customer_form import CustomerForm
 
 @solara.component

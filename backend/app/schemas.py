@@ -1,7 +1,7 @@
 """
 Pydantic schemas.
 """
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 from datetime import datetime
 
@@ -35,7 +35,7 @@ class CustomerResponse(CustomerBase):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class BarberBase(BaseModel):
@@ -67,7 +67,7 @@ class BarberResponse(BarberBase):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ServiceBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
@@ -96,4 +96,4 @@ class ServiceResponse(ServiceBase):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True

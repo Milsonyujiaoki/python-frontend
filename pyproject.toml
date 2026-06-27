@@ -1,27 +1,42 @@
-[tool.black]
-line-length = 88
-target-version = ['py313']
-include = '\.pyi?$'
-extend-exclude = '''
-/(
-    .git
-  | .hg
-  | .mypy_cache
-  | .tox
-  | .venv
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
-
 [tool.ruff]
-select = ["E", "F", "W", "C90"]
-ignore = []
 line-length = 88
 target-version = "py313"
-
+select = ["E", "F", "W", "C90", "I"]
+ignore = []
+# Per-file ignores
 [tool.ruff.per-file-ignores]
-# For example, we can ignore certain rules in specific files if needed.
-# "__init__.py" = ["F401"]
+"**/migrations/" = ["E501"]  # Ignore line length in migrations
+"**/__init__.py" = ["F401"]  # Ignore unused import in __init__.py
+
+[tool.pytest.ini_options]
+testpaths = [
+    "backend/tests",
+    "frontend/reflex/tests",
+    "frontend/solara/tests",
+    "frontend/fastui/tests",
+    "frontend/streamlit/tests",
+    "frontend/flet/tests",
+    "frontend/kivy/tests",
+]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--tb=short"
+]
+markers = [
+    "e2e: marks tests as end-to-end tests",
+    "smoke: marks tests as smoke tests",
+    "regression: marks tests as regression tests",
+    "unit: marks tests as unit tests",
+    "integration: marks tests as integration tests"
+]
+
+[tool.pytest.markers]
+# Additional marker configuration if needed
+e2e = "end-to-end test"
+smoke = "smoke test"
+regression = "regression test"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"

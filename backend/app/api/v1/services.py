@@ -2,17 +2,17 @@
 Service API endpoints.
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy.orm import Session
 from typing import List, Optional
+from sqlalchemy.orm import Session
 
-from .... import crud, models, schemas
-from ....database import get_db
+from app import crud, schemas
+from database import get_db
 
 router = APIRouter()
 
 
 @router.post("/", response_model=schemas.ServiceResponse, status_code=status.HTTP_201_CREATED)
-def create_service(service: schemas.ServiceCreate, db: Session = Depends(get_db)):
+async def create_service(service: schemas.ServiceCreate, db: Session = Depends(get_db)):
     """Create a new service."""
     # Check if service with this name already exists for the tenant
     db_service = crud.get_service_by_name(db, name=service.name)
@@ -22,7 +22,7 @@ def create_service(service: schemas.ServiceCreate, db: Session = Depends(get_db)
 
 
 @router.get("/{service_id}", response_model=schemas.ServiceResponse)
-def read_service(service_id: int, db: Session = Depends(get_db)):
+async def read_service(service_id: int, db: Session = Depends(get_db)):
     """Get a service by ID."""
     db_service = crud.get_service(db, service_id=service_id)
     if db_service is None:
@@ -31,9 +31,9 @@ def read_service(service_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/", response_model=List[schemas.ServiceResponse])
-def read_services(
-    skip: int = 0, 
-    limit: int = 100, 
+async def read_services(
+    skip: int = 0,
+    limit: int = 100,
     search: Optional[str] = Query(None, description="Search by name or description"),
     is_active: Optional[bool] = Query(None, description="Filter by active status"),
     db: Session = Depends(get_db)
@@ -44,7 +44,7 @@ def read_services(
 
 
 @router.put("/{service_id}", response_model=schemas.ServiceResponse)
-def update_service(service_id: int, service: schemas.ServiceUpdate, db: Session = Depends(get_db)):
+async def update_service(service_id: int, service: schemas.ServiceUpdate, db: Session = Depends(get_db)):
     """Update a service."""
     db_service = crud.update_service(db, service_id=service_id, service=service)
     if db_service is None:
@@ -53,7 +53,7 @@ def update_service(service_id: int, service: schemas.ServiceUpdate, db: Session 
 
 
 @router.delete("/{service_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_service(service_id: int, db: Session = Depends(get_db)):
+async def delete_service(service_id: int, db: Session = Depends(get_db)):
     """Delete a service."""
     db_service = crud.get_service(db, service_id=service_id)
     if db_service is None:

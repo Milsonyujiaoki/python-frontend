@@ -1,76 +1,88 @@
-"""Service table component for displaying a list of services."""
+"""Service table component with pagination and search."""
 
 import solara
-from .service_state import services, delete_service
+from .service_state import (
+    get_paginated_services,
+    get_total_pages,
+    get_total_count,
+    set_page,
+    set_search_query,
+    delete_service,
+    loading,
+    error,
+)
+
+
+def format_price(value):
+    """Format price as currency with two decimal places."""
+    try:
+        return f"${float(value):.2f}"
+    except (ValueError, TypeError):
+        return "$0.00"
+
+
+# Define the columns for the service table
+SERVICE_COLUMNS = [
+    {"label": "ID", "field": "id"},
+    {"label": "Name", "field": "name"},
+    {"label": "Description", "field": "description"},
+    {"label": "Duration", "field": "duration"},
+    {"label": "Price", "field": "price", "format": format_price},
+]
+
+# Define the row actions for the service table
+SERVICE_ROW_ACTIONS = [
+    {
+        "label": "Edit",
+        "on_click": lambda item: None,  # Navigate to edit page
+        "color": "primary",
+        "text": True,
+        "outline": True,
+    },
+    {
+        "label": "Delete",
+        "on_click": lambda item: delete_service(item.get("id")),
+        "color": "error",
+        "text": True,
+        "outline": True,
+    },
+]
+
 
 @solara.component
 def ServiceTable():
-    service_list = services.value
+    """
+    Service table with pagination, search, and performance optimizations.
 
-    return solara.Column([
-        solara.Markdown("### Services"),
-        solara.Table(
-            [
-                # Table header
-                [solara.Th("ID"), solara.Th("Name"), solara.Th("Description"), solara.Th("Price"), solara.Th("Actions")],
-                # Table rows
-                *[
-                    [
-                        solara.Td(str(s.get("id", ""))),
-                        solara.Td(s.get("name", "")),
-                        solara.Td(s.get("description", "")),
-                        solara.Td(f"${s.get('price', 0):.2f}"),
-                        solara.Td(
-                            sassistant
-We are in a text-based environment and cannot display images, but we can describe the table.
+    Features:
+    - Server-side pagination for large datasets
+    - Debounced search across name and description
+    - Price formatting
+    - Optimistic updates for delete operations
+    - Loading and error states
+    """
+    # Get paginated data (memoized)
+    page_items = get_paginated_services()
+    total_pages = get_total_pages()
+    total_count = get_total_count()
 
-Let's write the code.
+    # Page change handler
+    def handle_page_change(page: int):
+        set_page(page)
 
-<tool_call>
-<function=Write>
-<parameter=content>
-"""Service table component for displaying a list of services."""
+    # Import base table dynamically to avoid circular imports
+    from .components.base_table import BaseTable
 
-import solara
-from .service_state import services, delete_service
-
-@solara.component
-def ServiceTable():
-    service_list = services.value
-
-    return solara.Column([
-        solara.Markdown("### Services"),
-        solara.Table(
-            [
-                # Table header
-                [solara.Th("ID"), solara.Th("Name"), solara.Th("Description"), solara.Th("Price"), solara.Th("Actions")],
-                # Table rows
-                *[
-                    [
-                        solara.Td(str(s.get("id", ""))),
-                        solara.Td(s.get("name", "")),
-                        solara.Td(s.get("description", "")),
-                        solara.Td(f"${s.get('price', 0):.2f}"),
-                        solara.Td(
-                            sassistant
-We need to write the button for delete. Let's continue.
-
-We'll write the delete button.
-
-Let's finish the line<tool_call>
-<function=Write>
-<parameter=content>
-                                solara.Button(
-                                    "Delete",
-                                    on_click=lambda _, sid=s.get("id"): delete_service(sid),
-                                    color="error",
-                                    text=True,
-                                    outline=True,
-                                )
-                        ),
-                    ]
-                    for s in service_list
-                ],
-            ]
-        )
-    ])
+    return BaseTable(
+        title="Services",
+        columns=SERVICE_COLUMNS,
+        items=page_items,
+        row_actions=SERVICE_ROW_ACTIONS,
+        pagination=True,
+        page_size=10,
+        searchable=True,
+        search_field=None,  # Search all fields
+        loading=loading.value,
+        error=error.value,
+        on_page_change=handle_page_change,
+    )

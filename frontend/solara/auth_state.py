@@ -32,3 +32,7 @@ def clear_auth_state():
 
 def is_authenticated():
     return auth_token.value is not None and user.value != {}
+
+def get_entities():
+    """Get the list of entities (for auth, this is not applicable, returns empty list)."""
+    return []
