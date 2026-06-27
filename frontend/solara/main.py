@@ -211,7 +211,7 @@ def use_services():
 @solara.component
 def LoadingSpinner():
     """Beautiful loading spinner."""
-    with solara.VBox(style={"align_items": "center", "padding": "40px"}):
+    with solara.Div(style={"display": "flex", "display": "flex", "align_items": "center", "padding": "40px"}):
         solara.HTML(
             tag="div",
             style_="""
@@ -238,7 +238,7 @@ def LoadingSpinner():
 @solara.component
 def ErrorMessage(message: str):
     """Error message banner."""
-    with solara.VBox(style={
+    with solara.Div(style={
         "padding": "16px",
         "background": "#fef2f2",
         "border": "1px solid #fecaca",
@@ -263,7 +263,7 @@ def MetricCard(title: str, value: str, icon: str, trend: str = None, color: str 
             "box_shadow": "0 4px 6px -1px rgba(0,0,0,0.1)",
         }
     ):
-        with solara.HBox(style={"justify_content": "space-between", "align_items": "center"}):
+        with solara.Div(style={"display": "flex", "display": "flex", "justify_content": "space-between", "align_items": "center"}):
             solara.Markdown(f"**{title}**", style={"color": "rgba(255,255,255,0.9)", "font_size": "14px", "margin": "0"})
             solara.Markdown(icon, style={"font_size": "24px", "margin": "0"})
 
@@ -299,7 +299,7 @@ def StatCard(title: str, value: str, subtitle: str = None):
 @solara.component
 def NavigationRail():
     """Modern sidebar navigation."""
-    with solara.VBox(style={
+    with solara.Div(style={
         "width": "260px",
         "background": COLORS["bg_dark"],
         "padding": "20px 16px",
@@ -310,7 +310,7 @@ def NavigationRail():
         "box_shadow": "4px 0 12px rgba(0,0,0,0.1)",
     }):
         # Logo
-        with solara.HBox(style={"align_items": "center", "margin_bottom": "32px", "padding": "0 8px"}):
+        with solara.Div(style={"display": "flex", "align_items": "center", "margin_bottom": "32px", "padding": "0 8px"}):
             solara.Markdown("✂️", style={"font_size": "32px", "margin": "0"})
             solara.Markdown(
                 "**BarberPro**",
@@ -343,7 +343,7 @@ def NavigationRail():
                     "transition": "all 0.2s ease",
                 }
             ):
-                with solara.HBox(style={"align_items": "center", "gap": "12px"}):
+                with solara.Div(style={"display": "flex", "display": "flex", "align_items": "center", "gap": "12px"}):
                     solara.Markdown(icon, style={"font_size": "18px", "margin": "0"})
                     solara.Markdown(label, style={"font_size": "14px", "font_weight": "500" if is_active else "400", "margin": "0"})
 
@@ -351,7 +351,7 @@ def NavigationRail():
 
         # User section
         if state.authenticated.value:
-            with solara.VBox(style={"padding": "12px", "background": "rgba(255,255,255,0.1)", "border_radius": "12px"}):
+            with solara.Div(style={"padding": "12px", "background": "rgba(255,255,255,0.1)", "border_radius": "12px"}):
                 solara.Markdown(
                     f"👤 {state.user_email.value}",
                     style={"color": "white", "font_size": "13px", "margin": "0 0 8px 0"}
@@ -372,7 +372,7 @@ def NavigationRail():
 @solara.component
 def TopBar():
     """Top navigation bar."""
-    with solara.HBox(style={
+    with solara.Div(style={
         "background": "white",
         "padding": "16px 24px",
         "border_bottom": f"1px solid {COLORS['border']}",
@@ -385,7 +385,7 @@ def TopBar():
         solara.Markdown(f"**{page_name}**", style={"color": COLORS["text_primary"], "font_size": "20px", "margin": "0"})
 
         # Right actions
-        with solara.HBox(style={"align_items": "center", "gap": "12px"}):
+        with solara.Div(style={"display": "flex", "display": "flex", "align_items": "center", "gap": "12px"}):
             solara.Button(
                 icon_name="mdi-bell",
                 text=True,
@@ -393,7 +393,7 @@ def TopBar():
             )
             with solara.Card(
                 elevation=0,
-                style={"width": "36px", "height": "36px", "border_radius": "50%", "background": COLORS["primary"], "display": "flex", "align_items": "center", "justify_content": "center"}
+                style={"display": "flex", "display": "flex", "width": "36px", "height": "36px", "border_radius": "50%", "background": COLORS["primary"], "display": "flex", "align_items": "center", "justify_content": "center"}
             ):
                 solara.Markdown("👤", style={"margin": "0", "font_size": "16px"})
 
@@ -407,7 +407,7 @@ def DashboardPage():
     """Dashboard with metrics and overview."""
     solara.Title("Dashboard")
 
-    with solara.VBox(style={"padding": "24px"}):
+    with solara.Div(style={"padding": "24px"}):
         # Welcome header
         solara.Markdown(
             f"## Welcome back! 👋",
@@ -419,14 +419,14 @@ def DashboardPage():
         )
 
         # Metrics row
-        with solara.HBox(style={"gap": "16px", "flex_wrap": "wrap", "margin_bottom": "24px"}):
+        with solara.Div(style={"display": "flex", "gap": "16px", "flex_wrap": "wrap", "margin_bottom": "24px"}):
             StatCard("Total Customers", "127", "+12% vs last week")
             StatCard("Active Barbers", "8", "All on shift")
             StatCard("Services", "24", "5 categories")
             StatCard("Today's Revenue", "R$ 2.450", "+18% vs yesterday")
 
         # Content cards
-        with solara.HBox(style={"gap": "16px", "flex_wrap": "wrap"}):
+        with solara.Div(style={"display": "flex", "gap": "16px", "flex_wrap": "wrap"}):
             # Recent appointments
             with solara.Card(
                 elevation=0,
@@ -463,14 +463,14 @@ def DashboardPage():
             ):
                 solara.Markdown("**⚡ Quick Stats**", style={"margin": "0 0 16px 0"})
 
-                with solara.VBox(style={"gap": "12px"}):
-                    solara.LinearProgress(value=0.75, style={"margin": "0"})
+                with solara.Div(style={"display": "flex", "gap": "12px"}):
+                    solara.ProgressLinear(value=0.75, style={"margin": "0"})
                     solara.Markdown("75% capacity today", style={"font_size": "12px", "color": COLORS["text_secondary"], "margin": "0"})
 
-                    solara.LinearProgress(value=0.6, style={"margin": "0"})
+                    solara.ProgressLinear(value=0.6, style={"margin": "0"})
                     solara.Markdown("6 barbers on duty", style={"font_size": "12px", "color": COLORS["text_secondary"], "margin": "0"})
 
-                    solara.LinearProgress(value=0.9, style={"margin": "0"})
+                    solara.ProgressLinear(value=0.9, style={"margin": "0"})
                     solara.Markdown("90% customer satisfaction", style={"font_size": "12px", "color": COLORS["text_secondary"], "margin": "0"})
 
 
@@ -483,9 +483,9 @@ def CustomersPage():
     search_query = solara.use_reactive("")
     show_form = solara.use_reactive(False)
 
-    with solara.VBox(style={"padding": "24px"}):
+    with solara.Div(style={"padding": "24px"}):
         # Header
-        with solara.HBox(style={"justify_content": "space-between", "align_items": "center", "margin_bottom": "24px"}):
+        with solara.Div(style={"display": "flex", "display": "flex", "justify_content": "space-between", "align_items": "center", "margin_bottom": "24px"}):
             solara.Markdown("## 👥 Customers", style={"margin": "0"})
             solara.Button(
                 "➕ Add Customer",
@@ -543,7 +543,7 @@ def BarbersPage():
     barbers, loading, error, refresh = use_barbers()
     search_query = solara.use_reactive("")
 
-    with solara.VBox(style={"padding": "24px"}):
+    with solara.Div(style={"padding": "24px"}):
         # Header
         solara.Markdown("## 💈 Barbers", style={"margin": "0 0 24px 0"})
 
@@ -570,7 +570,7 @@ def BarbersPage():
             ]
 
             # Cards layout
-            with solara.HBox(style={"gap": "16px", "flex_wrap": "wrap"}):
+            with solara.Div(style={"display": "flex", "gap": "16px", "flex_wrap": "wrap"}):
                 for barber in filtered:
                     with solara.Card(
                         elevation=0,
@@ -583,7 +583,7 @@ def BarbersPage():
                             "flex": "1",
                         }
                     ):
-                        with solara.HBox(style={"align_items": "center", "gap": "12px", "margin_bottom": "12px"}):
+                        with solara.Div(style={"display": "flex", "display": "flex", "align_items": "center", "gap": "12px", "margin_bottom": "12px"}):
                             avatar_style = {
                                 "width": "48px", "height": "48px", "border_radius": "50%",
                                 "background": COLORS["primary"], "color": "white",
@@ -593,7 +593,7 @@ def BarbersPage():
                             initial = barber.get('first_name', '?')[0].upper()
                             solara.Markdown(initial, style=avatar_style)
 
-                            with solara.VBox():
+                            with solara.Div():
                                 solara.Markdown(
                                     f"**{barber.get('first_name', '')} {barber.get('last_name', '')}**",
                                     style={"margin": "0", "font_size": "16px"}
@@ -624,7 +624,7 @@ def ServicesPage():
     services, loading, error, refresh = use_services()
     search_query = solara.use_reactive("")
 
-    with solara.VBox(style={"padding": "24px"}):
+    with solara.Div(style={"padding": "24px"}):
         # Header
         solara.Markdown("## 💇 Services", style={"margin": "0 0 24px 0"})
 
@@ -668,7 +668,7 @@ def LoginPage():
     email = solara.use_reactive("")
     password = solara.use_reactive("")
 
-    with solara.VBox(style={
+    with solara.Div(style={"display": "flex", "display": "flex", 
         "min_height": "100vh",
         "background": "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
         "padding": "40px",
@@ -758,7 +758,7 @@ def Page():
     if page != "login":
         NavigationRail()
 
-        with solara.VBox(style={"margin_left": "260px", "min_height": "100vh", "background": "#f8fafc"}):
+        with solara.Div(style={"margin_left": "260px", "min_height": "100vh", "background": "#f8fafc"}):
             TopBar()
 
             # Page content

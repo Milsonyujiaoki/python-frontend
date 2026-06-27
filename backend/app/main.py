@@ -7,9 +7,16 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 import time
+import logging
+import os
 
 from app.api.api_v1 import api_router
 from app.core.config import settings
+from app.websocket import websocket_handler
+from app.middleware.idempotency import IdempotencyMiddleware, IdempotencyStore
+import redis
+
+logger = logging.getLogger(__name__)
 
 
 def create_application() -> FastAPI:
@@ -22,6 +29,35 @@ def create_application() -> FastAPI:
         openapi_url=f"{settings.API_V1_PREFIX}/openapi.json",
         docs_url=f"{settings.API_V1_PREFIX}/docs",
         redoc_url=f"{settings.API_V1_PREFIX}/redoc",
+    )
+
+    # Idempotency Middleware - with Redis if available
+    redis_host = os.getenv("REDIS_HOST", "localhost")
+    redis_port = int(os.getenv("REDIS_PORT", 6379))
+    redis_client = None
+
+    try:
+        redis_client = redis.Redis(
+            host=redis_host,
+            port=redis_port,
+            decode_responses=True,
+            socket_connect_timeout=5
+        )
+        # Test connection
+        redis_client.ping()
+        logger.info(f"Connected to Redis at {redis_host}:{redis_port}")
+    except Exception as e:
+        logger.warning(f"Redis not available, using in-memory cache: {e}")
+
+    idempotency_store = IdempotencyStore(
+        redis_client=redis_client,
+        ttl_seconds=300  # 5 minutes
+    )
+
+    application.add_middleware(
+        IdempotencyMiddleware,
+        store=idempotency_store,
+        header_name="X-Request-ID"
     )
 
     # CORS Middleware - allows frontend connections
@@ -117,6 +153,9 @@ def create_application() -> FastAPI:
                 "timestamp": time.time(),
             }
         }
+
+    # WebSocket endpoint for real-time sync
+    application.add_api_websocket_route("/ws", websocket_handler)
 
     return application
 
