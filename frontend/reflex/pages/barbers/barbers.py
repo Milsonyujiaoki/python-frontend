@@ -147,6 +147,35 @@ class BarberState(ReflexAuthState):
         """Set deleting state."""
         self.deleting = deleting
 
+    # Form field setters - required for Reflex on_change handlers
+    def set_first_name(self, name: str):
+        """Set first name."""
+        self.first_name = name
+
+    def set_last_name(self, name: str):
+        """Set last name."""
+        self.last_name = name
+
+    def set_email(self, email: str):
+        """Set email."""
+        self.email = email
+
+    def set_phone(self, phone: str):
+        """Set phone."""
+        self.phone = phone
+
+    def set_specialty(self, specialty: str):
+        """Set specialty."""
+        self.specialty = specialty
+
+    def set_creating(self, creating: bool):
+        """Set creating state."""
+        self.creating = creating
+
+    def set_editing(self, editing: bool):
+        """Set editing state."""
+        self.editing = editing
+
 
 def barbers_page() -> rx.Component:
     """Barber management page component."""
@@ -276,8 +305,7 @@ def barbers_page() -> rx.Component:
                                         BarberState.update_barber,
                                         BarberState.create_barber
                                     ),
-                                    reset_on_submit=False,
-                                    width="100%",
+                                    reset_on_submit=False
                                 ),
                                 width="100%",
                                 max_width="500px",

@@ -2,10 +2,10 @@
 import reflex as rx
 import sys
 import os
-from rxconfig import config
 
-# Add the frontend directory to the path so we can import from the reflex directory
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+# Add the reflex directory to the path so we can import from it
+REFLEX_DIR = os.path.join(os.path.dirname(__file__), '..')
+sys.path.insert(0, REFLEX_DIR)
 
 from state import ReflexAuthState
 from pages.auth import login_page, register_page, forgot_password_page

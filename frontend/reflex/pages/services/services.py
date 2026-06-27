@@ -142,6 +142,31 @@ class ServiceState(ReflexAuthState):
         """Set deleting state."""
         self.deleting = deleting
 
+    # Form field setters - required for Reflex on_change handlers
+    def set_name(self, name: str):
+        """Set service name."""
+        self.name = name
+
+    def set_description(self, description: str):
+        """Set service description."""
+        self.description = description
+
+    def set_price(self, price: float):
+        """Set service price."""
+        self.price = price
+
+    def set_duration(self, duration: int):
+        """Set service duration."""
+        self.duration = duration
+
+    def set_creating(self, creating: bool):
+        """Set creating state."""
+        self.creating = creating
+
+    def set_editing(self, editing: bool):
+        """Set editing state."""
+        self.editing = editing
+
 
 def services_page() -> rx.Component:
     """Service management page component."""
@@ -269,8 +294,7 @@ def services_page() -> rx.Component:
                                         ServiceState.update_service,
                                         ServiceState.create_service
                                     ),
-                                    reset_on_submit=False,
-                                    width="100%",
+                                    reset_on_submit=False
                                 ),
                                 width="100%",
                                 max_width="500px",

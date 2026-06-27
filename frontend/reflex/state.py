@@ -18,7 +18,7 @@ class ReflexAuthState(AuthStateManager, rx.State):
     """Reflex implementation of authentication state management."""
 
     # Auth state variables
-    is_authenticated: bool = False
+    auth_status: bool = False  # Renamed from is_authenticated to avoid method conflict
     auth_token: str = ""
     current_user: dict = {}
     loading: bool = False
@@ -37,6 +37,11 @@ class ReflexAuthState(AuthStateManager, rx.State):
         super().__init__()
         # Initialize the API service with the backend URL
         self.api_service = ReflexApiService("http://localhost:8000")
+
+    @rx.var
+    def is_authenticated(self) -> bool:
+        """Return authentication status (computed var, not base var)."""
+        return self.auth_status
 
     @rx.var
     def is_loading(self) -> bool:
@@ -88,6 +93,10 @@ class ReflexAuthState(AuthStateManager, rx.State):
         """Clear success message."""
         self.success_message = ""
 
+    def set_auth_status(self, status: bool):
+        """Set authentication status."""
+        self.auth_status = status
+
     # Form field setters
     def set_login_email(self, email: str):
         """Set login email."""
@@ -113,6 +122,18 @@ class ReflexAuthState(AuthStateManager, rx.State):
         """Set reset email."""
         self.reset_email = email
 
+    def set_creating(self, creating: bool):
+        """Set creating state."""
+        self.creating = creating
+
+    def set_editing(self, editing: bool):
+        """Set editing state."""
+        self.editing = editing
+
+    def set_deleting(self, deleting: bool):
+        """Set deleting state."""
+        self.deleting = deleting
+
     async def login(self, email: str, password: str):
         """Log in a user."""
         self.set_loading(True)
@@ -128,7 +149,7 @@ class ReflexAuthState(AuthStateManager, rx.State):
             if response and "access_token" in response:
                 self.auth_token = response["access_token"]
                 self.current_user = response.get("user", {})
-                self.is_authenticated = True
+                self.set_auth_status(True)
                 self.api_service.update_auth_token(self.auth_token)
                 self.set_loading(False)
                 return [rx.redirect("/")]
@@ -145,13 +166,9 @@ class ReflexAuthState(AuthStateManager, rx.State):
         """Log out the current user."""
         self.auth_token = ""
         self.current_user = {}
-        self.is_authenticated = False
+        self.set_auth_status(False)
         self.api_service.update_auth_token("")
         self.clear_error()
-
-    def is_authenticated(self) -> bool:
-        """Check if a user is currently authenticated."""
-        return self.is_authenticated
 
     def get_current_user(self) -> Optional[Dict[str, Any]]:
         """Get the currently authenticated user."""
@@ -183,7 +200,7 @@ class ReflexAuthState(AuthStateManager, rx.State):
             if response and "access_token" in response:
                 self.auth_token = response["access_token"]
                 self.current_user = response.get("user", {})
-                self.is_authenticated = True
+                self.set_auth_status(True)
                 self.api_service.update_auth_token(self.auth_token)
                 self.set_loading(False)
                 return True

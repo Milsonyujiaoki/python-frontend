@@ -143,6 +143,31 @@ class CustomerState(ReflexAuthState):
         """Set deleting state."""
         self.deleting = deleting
 
+    # Form field setters - required for Reflex on_change handlers
+    def set_first_name(self, name: str):
+        """Set first name."""
+        self.first_name = name
+
+    def set_last_name(self, name: str):
+        """Set last name."""
+        self.last_name = name
+
+    def set_email(self, email: str):
+        """Set email."""
+        self.email = email
+
+    def set_phone(self, phone: str):
+        """Set phone."""
+        self.phone = phone
+
+    def set_creating(self, creating: bool):
+        """Set creating state."""
+        self.creating = creating
+
+    def set_editing(self, editing: bool):
+        """Set editing state."""
+        self.editing = editing
+
 
 def customers_page() -> rx.Component:
     """Customer management page component with responsive design."""
@@ -257,15 +282,14 @@ def customers_page() -> rx.Component:
                                             is_visible=CustomerState.success_message != "",
                                             mt=3,
                                         ),
-                                        width="100%",
-                                    ),
+                                ),
+                                    width="100%",
                                     on_submit=rx.condition(
                                         CustomerState.editing,
                                         CustomerState.update_customer,
                                         CustomerState.create_customer
                                     ),
-                                    reset_on_submit=False,
-                                    width="100%",
+                                    reset_on_submit=False
                                 ),
                                 width="100%",
                                 max_width="500px",
