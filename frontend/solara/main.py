@@ -299,8 +299,10 @@ def StatCard(title: str, value: str, subtitle: str = None):
 @solara.component
 def NavigationRail():
     """Modern sidebar navigation."""
+    sidebar_width = "260px" if state.sidebar_open.value else "60px"
+    show_text = state.sidebar_open.value
     with solara.Div(style={
-        "width": "260px",
+        "width": sidebar_width,
         "background": COLORS["bg_dark"],
         "padding": "20px 16px",
         "height": "100vh",
@@ -308,16 +310,41 @@ def NavigationRail():
         "left": "0",
         "top": "0",
         "box_shadow": "4px 0 12px rgba(0,0,0,0.1)",
+        "transition": "width 0.3s ease",
+        "overflow_x": "hidden",
+        "z_index": "1000"
     }):
-        # Logo
-        with solara.Div(style={"display": "flex", "align_items": "center", "margin_bottom": "32px", "padding": "0 8px"}):
-            solara.Markdown("✂️", style={"font_size": "32px", "margin": "0"})
-            solara.Markdown(
-                "**BarberPro**",
-                style={"color": "white", "font_size": "20px", "font_weight": "700", "margin": "0 0 0 10px"}
-            )
+        # Menu button (always visible)
+        with solara.Button(
+            on_click=lambda: setattr(state.sidebar_open, 'value', not state.sidebar_open.value),
+            style={
+                "width": "100%",
+                "padding": "12px",
+                "margin_bottom": "24px",
+                "border_radius": "12px",
+                "border": "none",
+                "background": "rgba(255,255,255,0.1)",
+                "color": "white",
+                "font_size": "18px",
+                "display": "flex",
+                "align_items": "center",
+                "justify_content": "center",
+                "cursor": "pointer",
+            }
+        ):
+            solara.Markdown("☰", style={"font_size": "24px", "margin": "0"})
 
-        solara.Markdown("---", style={"border_color": "rgba(255,255,255,0.1)", "margin": "0 0 24px 0"})
+        # Logo (only show text when expanded)
+        if show_text:
+            with solara.Div(style={"display": "flex", "align_items": "center", "margin_bottom": "32px", "padding": "0 8px"}):
+                solara.Markdown("✂️", style={"font_size": "32px", "margin": "0"})
+                solara.Markdown(
+                    "**BarberPro**",
+                    style={"color": "white", "font_size": "20px", "font_weight": "700", "margin": "0 0 0 10px"}
+                )
+
+        if show_text:
+            solara.Markdown("---", style={"border_color": "rgba(255,255,255,0.1)", "margin": "0 0 24px 0"})
 
         # Navigation items
         nav_items = [
@@ -330,72 +357,102 @@ def NavigationRail():
 
         for page, icon, label in nav_items:
             is_active = state.current_page.value == page
-            with solara.Button(
-                on_click=lambda p=page: setattr(state, 'current_page', p),
-                style={
-                    "background": "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)" if is_active else "transparent",
-                    "color": "white",
-                    "border_radius": "12px",
-                    "padding": "14px 16px",
-                    "margin": "4px 0",
-                    "border": "none",
-                    "text_align": "left",
-                    "transition": "all 0.2s ease",
-                }
-            ):
-                with solara.Div(style={"display": "flex", "display": "flex", "align_items": "center", "gap": "12px"}):
+            if show_text:
+                with solara.Button(
+                    on_click=lambda p=page: setattr(state, 'current_page', p),
+                    style={
+                        "background": "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)" if is_active else "transparent",
+                        "color": "white",
+                        "border_radius": "12px",
+                        "padding": "14px 16px",
+                        "margin": "4px 0",
+                        "border": "none",
+                        "text_align": "left",
+                        "transition": "all 0.2s ease",
+                        "width": "100%",
+                    }
+                ):
+                    with solara.Div(style={"display": "flex", "align_items": "center", "gap": "12px"}):
+                        solara.Markdown(icon, style={"font_size": "18px", "margin": "0"})
+                        solara.Markdown(label, style={"font_size": "14px", "font_weight": "500" if is_active else "400", "margin": "0"})
+            else:
+                # Only show icon when collapsed
+                with solara.Button(
+                    on_click=lambda p=page: setattr(state, 'current_page', p),
+                    style={
+                        "background": "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)" if is_active else "transparent",
+                        "color": "white",
+                        "border_radius": "12px",
+                        "padding": "14px",
+                        "margin": "4px 0",
+                        "border": "none",
+                        "width": "100%",
+                        "display": "flex",
+                        "align_items": "center",
+                        "justify_content": "center",
+                    }
+                ):
                     solara.Markdown(icon, style={"font_size": "18px", "margin": "0"})
-                    solara.Markdown(label, style={"font_size": "14px", "font_weight": "500" if is_active else "400", "margin": "0"})
 
-        solara.Markdown("---", style={"border_color": "rgba(255,255,255,0.1)", "margin": "auto 0 24px 0"})
+        if show_text:
+            solara.Markdown("---", style={"border_color": "rgba(255,255,255,0.1)", "margin": "auto 0 24px 0"})
 
-        # User section
-        if state.authenticated.value:
-            with solara.Div(style={"padding": "12px", "background": "rgba(255,255,255,0.1)", "border_radius": "12px"}):
-                solara.Markdown(
-                    f"👤 {state.user_email.value}",
-                    style={"color": "white", "font_size": "13px", "margin": "0 0 8px 0"}
-                )
+            # User section
+            if state.authenticated.value:
+                with solara.Div(style={"padding": "12px", "background": "rgba(255,255,255,0.1)", "border_radius": "12px"}):
+                    solara.Markdown(
+                        f"👤 {state.user_email.value}",
+                        style={"color": "white", "font_size": "13px", "margin": "0 0 8px 0"}
+                    )
+                    solara.Button(
+                        "Logout",
+                        on_click=lambda: (setattr(state, 'authenticated', False), setattr(state, 'user_email', None)),
+                        style={"background": "rgba(239,68,68,0.2)", "color": "#fca5a5", "border": "none", "border_radius": "8px", "padding": "8px 12px"}
+                    )
+            else:
                 solara.Button(
-                    "Logout",
-                    on_click=lambda: (setattr(state, 'authenticated', False), setattr(state, 'user_email', None)),
-                    style={"background": "rgba(239,68,68,0.2)", "color": "#fca5a5", "border": "none", "border_radius": "8px", "padding": "8px 12px"}
+                    "🔐 Login",
+                    on_click=lambda: setattr(state, 'current_page', 'login'),
+                    style={"background": "rgba(255,255,255,0.1)", "color": "white", "border": "none", "border_radius": "8px", "padding": "10px"}
                 )
-        else:
-            solara.Button(
-                "🔐 Login",
-                on_click=lambda: setattr(state, 'current_page', 'login'),
-                style={"background": "rgba(255,255,255,0.1)", "color": "white", "border": "none", "border_radius": "8px", "padding": "10px"}
-            )
 
 
 @solara.component
 def TopBar():
-    """Top navigation bar."""
+    """Top navigation bar with explicit flex row."""
+    page_name = state.current_page.value.capitalize()
+
     with solara.Div(style={
-        "background": "white",
-        "padding": "16px 24px",
-        "border_bottom": f"1px solid {COLORS['border']}",
+        "display": "flex",
+        "flex_direction": "row",
         "justify_content": "space-between",
         "align_items": "center",
-        "margin_left": "260px",
+        "background_color": "white",
+        "padding": "16px 24px",
+        "border_bottom": f"1px solid {COLORS['border']}",
+        "height": "70px",
+        "box_sizing": "border-box"
     }):
         # Breadcrumb
-        page_name = state.current_page.value.capitalize()
         solara.Markdown(f"**{page_name}**", style={"color": COLORS["text_primary"], "font_size": "20px", "margin": "0"})
 
         # Right actions
-        with solara.Div(style={"display": "flex", "display": "flex", "align_items": "center", "gap": "12px"}):
+        with solara.Div(style={"display": "flex", "align_items": "center", "gap": "16px"}):
             solara.Button(
                 icon_name="mdi-bell",
                 text=True,
-                style={"color": COLORS["text_secondary"], "min_width": "40px"}
+                style={"color": COLORS["text_secondary"], "min_width": "40px", "margin": "0"}
             )
-            with solara.Card(
-                elevation=0,
-                style={"display": "flex", "display": "flex", "width": "36px", "height": "36px", "border_radius": "50%", "background": COLORS["primary"], "display": "flex", "align_items": "center", "justify_content": "center"}
-            ):
-                solara.Markdown("👤", style={"margin": "0", "font_size": "16px"})
+            with solara.Div(style={
+                "width": "36px",
+                "height": "36px",
+                "border_radius": "50%",
+                "background_color": COLORS["primary"],
+                "display": "flex",
+                "align_items": "center",
+                "justify_content": "center"
+            }):
+                solara.Markdown("👤", style={"margin": "0", "font_size": "16px", "line_height": "1"})
 
 
 # =============================================================================
@@ -751,29 +808,45 @@ def LoginPage():
 
 @solara.component
 def Page():
-    """Main application layout."""
+    """Main application layout with proper flex structure."""
     page = state.current_page.value
 
     # Render navigation
     if page != "login":
         NavigationRail()
 
-        with solara.Div(style={"margin_left": "260px", "min_height": "100vh", "background": "#f8fafc"}):
+        # Main content container
+        sidebar_width = "260px" if state.sidebar_open.value else "60px"
+        with solara.Div(style={
+            "margin_left": sidebar_width,
+            "min_height": "100vh",
+            "background": "#f8fafc",
+            "transition": "margin-left 0.3s ease",
+            "display": "flex",
+            "flex_direction": "column",
+        }):
             TopBar()
 
-            # Page content
-            if page == "dashboard":
-                DashboardPage()
-            elif page == "customers":
-                CustomersPage()
-            elif page == "barbers":
-                BarbersPage()
-            elif page == "services":
-                ServicesPage()
-            elif page == "appointments":
-                solara.Markdown("## 📅 Appointments\n\nComing soon!", style={"padding": "24px"})
-            else:
-                solara.Markdown("## Page not found", style={"padding": "24px"})
+            # Page content area with scrolling
+            with solara.Div(style={
+                "flex": "1",
+                "overflow_y": "auto",
+                "padding": "0",
+                "margin": "0"
+            }):
+                # Page content
+                if page == "dashboard":
+                    DashboardPage()
+                elif page == "customers":
+                    CustomersPage()
+                elif page == "barbers":
+                    BarbersPage()
+                elif page == "services":
+                    ServicesPage()
+                elif page == "appointments":
+                    solara.Markdown("## 📅 Appointments\n\nComing soon!", style={"padding": "24px"})
+                else:
+                    solara.Markdown("## Page not found", style={"padding": "24px"})
     else:
         LoginPage()
 

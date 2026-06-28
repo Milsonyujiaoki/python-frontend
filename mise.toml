@@ -1,0 +1,298 @@
+# BarberPro - mise.toml
+# Task runner com uv + venv para gerenciamento de dependências
+
+settings = { env_shell_expand = false }
+
+[env]
+# Activate virtual environment
+VIRTUAL_ENV = "{{config_root}}/.venv"
+PATH = "{{config_root}}/.venv/bin:$PATH"
+
+# Application settings
+BARBERPRO_ENV = "development"
+API_V1_PREFIX = "/api/v1"
+
+# Frontend ports
+SOLARA_PORT = "8501"
+FLET_PORT = "8083"
+STREAMLIT_PORT = "8502"
+REFLEX_PORT = "8504"
+FASTUI_PORT = "8503"
+
+# Backend
+BACKEND_PORT = "8000"
+
+[tasks]
+# =============================================================================
+# SETUP & INSTALLATION
+# =============================================================================
+
+setup = { description = "Initial project setup with uv", run = """
+#!/bin/bash
+set -e
+echo "🔧 Setting up BarberPro with uv..."
+
+# Create virtual environment if it doesn't exist
+if [ ! -d ".venv" ]; then
+uv venv .venv --python 3.13
+fi
+
+# Activate venv
+source .venv/bin/activate
+
+# Install all dependencies
+echo "📦 Installing backend dependencies..."
+pip install fastapi uvicorn[standard] sqlalchemy alembic python-multipart passlib bcrypt python-dotenv redis pydantic pydantic-settings python-jose cryptography
+
+echo "📦 Installing frontend dependencies..."
+pip install solara flet streamlit reflex httpx requests pandas plotly
+
+echo "✅ Setup complete!"
+echo ""
+echo "To activate the environment: source .venv/bin/activate"
+echo "Or use mise tasks which auto-activate: mise run <task>"
+""" }
+
+install = { description = "Install/reinstall all dependencies", run = """
+#!/bin/bash
+source .venv/bin/activate
+pip install -q fastapi uvicorn[standard] sqlalchemy alembic python-multipart passlib bcrypt python-dotenv redis pydantic pydantic-settings python-jose cryptography
+pip install -q solara flet streamlit reflex httpx requests pandas plotly
+echo "✅ Dependencies installed!"
+""" }
+
+# =============================================================================
+# BACKEND TASKS
+# =============================================================================
+
+backend-run = { description = "Run FastAPI backend server", run = """
+#!/bin/bash
+source .venv/bin/activate
+cd backend
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+""" }
+
+backend-dev = { description = "Run backend with debug mode", run = """
+#!/bin/bash
+source .venv/bin/activate
+cd backend
+uvicorn app.main:app --reload --debug --host 0.0.0.0 --port 8000
+""" }
+
+backend-test = { description = "Run backend tests", run = """
+#!/bin/bash
+source .venv/bin/activate
+pytest backend/tests -v
+""" }
+
+backend-lint = { description = "Lint backend code", run = "ruff check backend" }
+backend-format = { description = "Format backend code", run = "ruff format backend" }
+backend-check = { description = "Run all checks", run = ["__backend-lint", "__backend-test"] }
+
+# =============================================================================
+# DATABASE & CACHE (Docker Compose)
+# =============================================================================
+
+db-up = { description = "Start PostgreSQL and Redis containers", run = "docker-compose up -d postgres redis" }
+db-down = { description = "Stop and remove containers", run = "docker-compose down -v" }
+db-logs = { description = "View logs", run = "docker-compose logs -f postgres redis" }
+db-restart = { description = "Restart containers", run = "docker-compose restart postgres redis" }
+db-migrate = { description = "Run database migrations", run = """
+#!/bin/bash
+source .venv/bin/activate
+cd backend
+alembic upgrade head
+""" }
+
+# =============================================================================
+# FRONTEND - SOLARA (Linear/Vercel style)
+# =============================================================================
+
+solara-run = { description = "Run Solara frontend", run = """
+#!/bin/bash
+source .venv/bin/activate
+solara run frontend/solara/main.py --port 8501 --host 0.0.0.0
+""" }
+
+solara-dev = { description = "Run Solara in dev mode", run = """
+#!/bin/bash
+source .venv/bin/activate
+solara run frontend/solara/main.py --port 8501 --host 0.0.0.0
+""" }
+
+solara-test = { description = "Run Solara tests", run = """
+#!/bin/bash
+source .venv/bin/activate
+pytest frontend/solara/tests -v
+""" }
+
+solara-lint = { description = "Lint Solara code", run = "ruff check frontend/solara" }
+
+# =============================================================================
+# FRONTEND - FLET (Instagram/Twitter style)
+# =============================================================================
+
+flet-run = { description = "Run Flet frontend", run = """
+#!/bin/bash
+source .venv/bin/activate
+cd frontend/flet
+python main.py
+""" }
+
+flet-dev = { description = "Run Flet in dev mode", run = """
+#!/bin/bash
+source .venv/bin/activate
+cd frontend/flet
+python main.py
+""" }
+
+flet-test = { description = "Run Flet tests", run = """
+#!/bin/bash
+source .venv/bin/activate
+pytest frontend/flet/tests -v
+""" }
+
+flet-lint = { description = "Lint Flet code", run = "ruff check frontend/flet" }
+
+# =============================================================================
+# FRONTEND - STREAMLIT (Stripe/Shopify style)
+# =============================================================================
+
+streamlit-run = { description = "Run Streamlit frontend", run = """
+#!/bin/bash
+source .venv/bin/activate
+streamlit run frontend/streamlit_updated/main.py --server.port 8502 --server.address 0.0.0.0
+""" }
+
+streamlit-dev = { description = "Run Streamlit in dev mode", run = """
+#!/bin/bash
+source .venv/bin/activate
+streamlit run frontend/streamlit_updated/main.py --server.port 8502 --server.address 0.0.0.0 --server.headless true
+""" }
+
+streamlit-test = { description = "Run Streamlit tests", run = """
+#!/bin/bash
+source .venv/bin/activate
+pytest frontend/streamlit_updated/tests -v
+""" }
+
+streamlit-lint = { description = "Lint Streamlit code", run = "ruff check frontend/streamlit_updated" }
+
+# =============================================================================
+# FRONTEND - REFLEX (Full-stack web)
+# =============================================================================
+
+reflex-run = { description = "Run Reflex frontend", run = """
+#!/bin/bash
+source .venv/bin/activate
+cd frontend/reflex
+reflex run --frontend-port 8504 --backend-port 8505
+""" }
+
+reflex-dev = { description = "Run Reflex in dev mode", run = """
+#!/bin/bash
+source .venv/bin/activate
+cd frontend/reflex
+reflex run --env dev --frontend-port 8504 --backend-port 8505
+""" }
+
+reflex-test = { description = "Run Reflex tests", run = """
+#!/bin/bash
+source .venv/bin/activate
+pytest frontend/reflex/tests -v
+""" }
+
+reflex-lint = { description = "Lint Reflex code", run = "ruff check frontend/reflex" }
+
+# =============================================================================
+# FRONTEND - FASTUI
+# =============================================================================
+
+fastui-run = { description = "Run FastUI frontend", run = """
+#!/bin/bash
+source .venv/bin/activate
+fastui run frontend/fastui/main.py --port 8503
+""" }
+
+fastui-test = { description = "Run FastUI tests", run = """
+#!/bin/bash
+source .venv/bin/activate
+pytest frontend/fastui/tests -v
+""" }
+
+fastui-lint = { description = "Lint FastUI code", run = "ruff check frontend/fastui" }
+
+# =============================================================================
+# GLOBAL TASKS
+# =============================================================================
+
+# Quick start - backend only (most common dev workflow)
+dev = { description = "Start backend in development mode", run = "__backend-dev" }
+
+# Start all services (not recommended - use individual tasks instead)
+start-all = { description = "Start backend and all frontends", run = [
+"__backend-run",
+"__solara-run",
+"__flet-run",
+"__streamlit-run",
+"__reflex-run",
+] }
+
+# Code quality
+test = { description = "Run all tests", run = [
+"__backend-test",
+"__solara-test",
+"__flet-test",
+"__streamlit-test",
+"__reflex-test",
+] }
+
+lint = { description = "Lint all code", run = [
+"__backend-lint",
+"__solara-lint",
+"__flet-lint",
+"__streamlit-lint",
+"__reflex-lint",
+] }
+
+format = { description = "Format all code", run = [
+"ruff format backend",
+"ruff format frontend",
+] }
+
+check = { description = "Run all checks (lint + test)", run = ["__lint", "__test"] }
+
+# Cleanup
+clean = { description = "Clean generated files", run = """
+#!/bin/bash
+find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+find . -type f -name "*.pyc" -delete 2>/dev/null || true
+find . -type f -name "*.pyo" -delete 2>/dev/null || true
+find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
+find . -type d -name ".mypy_cache" -exec rm -rf {} + 2>/dev/null || true
+echo "✅ Clean complete!"
+""" }
+
+# =============================================================================
+# SHORTCUTS (aliases via tasks)
+# =============================================================================
+
+# Backend shortcuts
+b = "__backend-run"
+bd = "__backend-dev"
+bt = "__backend-test"
+
+# Frontend shortcuts
+s = "__solara-run"
+f = "__flet-run"
+st = "__streamlit-run"
+r = "__reflex-run"
+
+# Database shortcuts
+dup = "__db-up"
+ddown = "__db-down"
+dlog = "__db-logs"
+
+# Info
+swagger = { description = "Show Swagger URL", run = "echo '📄 Swagger UI: http://localhost:8000/api/v1/docs'" }
+help = { description = "Show all tasks", run = "mise tasks ls" }
