@@ -287,8 +287,8 @@ def services_page() -> rx.Component:
                                             is_visible=ServiceState.success_message != "",
                                             mt=3,
                                         ),
-                                        width="100%",
                                     ),
+                                    width="100%",
                                     on_submit=rx.condition(
                                         ServiceState.editing,
                                         ServiceState.update_service,

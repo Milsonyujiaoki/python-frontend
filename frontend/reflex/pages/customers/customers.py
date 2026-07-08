@@ -282,15 +282,16 @@ def customers_page() -> rx.Component:
                                             is_visible=CustomerState.success_message != "",
                                             mt=3,
                                         ),
-                                ),
+                                    ),
                                     width="100%",
                                     on_submit=rx.condition(
                                         CustomerState.editing,
                                         CustomerState.update_customer,
                                         CustomerState.create_customer
                                     ),
-                                    reset_on_submit=False
+                                    reset_on_submit=False,
                                 ),
+                                )
                                 width="100%",
                                 max_width="500px",
                             ),

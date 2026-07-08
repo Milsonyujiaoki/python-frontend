@@ -298,8 +298,8 @@ def barbers_page() -> rx.Component:
                                             is_visible=BarberState.success_message != "",
                                             mt=3,
                                         ),
-                                        width="100%",
                                     ),
+                                    width="100%",
                                     on_submit=rx.condition(
                                         BarberState.editing,
                                         BarberState.update_barber,
